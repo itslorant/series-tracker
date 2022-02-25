@@ -1,7 +1,7 @@
 # Under construction 🚧
 
 ## About the project
-The project goal is the user can track their current series by season and epiose. Nothing fancy just a few inputs.
+The project goal is the user can track their current series by season and episode. Nothing fancy just a few inputs.
 
 ## Getting Started with Create React App
 
