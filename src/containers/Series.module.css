@@ -1,0 +1,8 @@
+.AddButton{
+    margin: 0;
+    top: auto;
+    right: 20px;
+    bottom: 20px;
+    left: auto;
+    position: fixed;
+}
