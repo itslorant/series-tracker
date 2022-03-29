@@ -1,0 +1,38 @@
+.Modal {
+  position: fixed;
+  top: 20vh;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  z-index: 100;
+  border-radius: 7px;
+}
+
+.Modal h2 {
+  margin: 0;
+  padding: 1rem;
+  background: #2075ff;
+  color: white;
+  border-radius: 7px 7px 0 0;
+}
+
+.Modal div {
+  padding: 1rem;
+}
+
+.Backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 50;
+}
+
+@media (min-width: 800px){
+  .Modal{
+    width: 25rem;
+    left: calc(50% - 12.5rem);
+  }
+}
