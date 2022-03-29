@@ -3,8 +3,13 @@ import React, { useEffect, useReducer, useState } from "react";
 import axios from "axios";
 
 import SeriesForm from "../components/SeriesForm/SeriesForm";
-import EditSeries from "../components/EditSeries/EditSeries";
 import SeriesList from "../components/SeriesList/SeriesList";
+import Modal from "../components/UI/Modal/Modal";
+import Button from "@mui/material/Button";
+import Fab from "@mui/material/Fab";
+import AddIcon from "@mui/icons-material/Add";
+
+import style from "./Series.module.css";
 
 const seriesReducer = (currentSeries, action) => {
   switch (action.type) {
@@ -24,6 +29,7 @@ export default function Series() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [seriesId, setSeriesId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     axios({
@@ -60,10 +66,10 @@ export default function Series() {
         setIsLoading((prevLoading) => !prevLoading);
       })
       .catch((error) => setError(error.message));
+    onCloseModal();
   };
 
-  const onDeleteSeriesHandler = (event) => {
-    const seriesId = event.target.parentNode.id;
+  const onDeleteSeriesHandler = (event, seriesId) => {
     axios({
       url: process.env.REACT_APP_BASE_URL + `/series/${seriesId}.json`,
       method: "DELETE",
@@ -78,12 +84,12 @@ export default function Series() {
       .catch((error) => setError(error.message));
   };
 
-  const onModifySeriesHandler = (event) => {
-    const seriesId = event.target.parentNode.id;
-    setSeriesId(seriesId)
+  const onModifySeriesHandler = (event, seriesId) => {
+    setSeriesId(seriesId);
+    setShowModal(true);
   };
 
-  const modifySeries = (series)=>{
+  const modifySeries = (series) => {
     axios({
       url: process.env.REACT_APP_BASE_URL + `/series/${seriesId}.json`,
       method: "PATCH",
@@ -93,26 +99,56 @@ export default function Series() {
         setIsLoading((prevLoading) => !prevLoading);
       })
       .catch((error) => setError(error.message));
-      setSeriesId(null)
-  }
+    setSeriesId(null);
+    onCloseModal();
+  };
 
+  const onShowModal = () => {
+    setShowModal(true);
+  };
 
+  const onCloseModal = () => {
+    setShowModal(false);
+    setSeriesId(null)
+  };
+
+  let modalTitle = "Add Series";
   let seriesForm = <SeriesForm onSubmit={onAddSeriesHandler} />;
   if (seriesId) {
-    seriesForm = <EditSeries onSubmit={modifySeries} seriesData={userSeries.filter((se) => se.id === seriesId)[0]} />;
+    modalTitle = "Edit Series";
+    seriesForm = (
+      <SeriesForm
+        onSubmit={modifySeries}
+        seriesData={userSeries.filter((se) => se.id === seriesId)[0]}
+      />
+    );
   }
-  
-  
+
+  let modal = (
+    <Modal title={modalTitle} onClose={onCloseModal}>
+      {seriesForm}
+    </Modal>
+  );
+
+  let addButton = (
+    <Fab color="primary" aria-label="add" onClick={() => onShowModal()}>
+      <AddIcon />
+    </Fab>
+  );
+
   return (
     <React.Fragment>
+      <h1>Series</h1>
       {error}
-      {console.log("rendered", seriesId)}
-      {seriesForm}
-      <SeriesList
+      {showModal && modal}
+      <SeriesList 
         series={userSeries}
-        onModifySeries={(event) => onModifySeriesHandler(event)}
-        onDeleteSeries={(event) => onDeleteSeriesHandler(event)}
+        onModifySeries={(event, seriesId) =>
+          onModifySeriesHandler(event, seriesId)
+        }
+        onDeleteSeries={(event, seriesId) => onDeleteSeriesHandler(event, seriesId)}
       />
+      <div className={style.AddButton}>{!showModal && addButton}</div>
     </React.Fragment>
   );
 }
