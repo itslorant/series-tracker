@@ -3,12 +3,26 @@ import React, { useState } from "react";
 // import InputField from "../UI/Input/Input";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
+
 export default function SeriesForm(props) {
-  const [title, setTitle] = useState("");
-  const [season, setSeason] = useState("");
-  const [episode, setEpisode] = useState("");
-  const [extraInfo, setExtraInfo] = useState("");
+  // const [title, setTitle] = useState("");
+  // const [season, setSeason] = useState("");
+  // const [episode, setEpisode] = useState("");
+  // const [extraInfo, setExtraInfo] = useState("");
+  let titleProp = "";
+  let seasonProp = "";
+  let episodeProp = "";
+  let extraInfoProp = "";
+  if (props.seriesData !== undefined) {
+    titleProp = props.seriesData.title;
+    seasonProp = props.seriesData.season;
+    episodeProp = props.seriesData.episode;
+    extraInfoProp = props.seriesData.extraInfo;
+  }
+  const [title, setTitle] = useState(titleProp);
+  const [season, setSeason] = useState(seasonProp);
+  const [episode, setEpisode] = useState(episodeProp);
+  const [extraInfo, setExtraInfo] = useState(extraInfoProp);
 
   const submitHandler = (event) => {
     event.preventDefault();
@@ -24,7 +38,7 @@ export default function SeriesForm(props) {
     <React.Fragment>
       <form onSubmit={submitHandler}>
         <TextField
-          label="text"
+          label="Title"
           type="text"
           id="title"
           name="title"
@@ -35,7 +49,7 @@ export default function SeriesForm(props) {
           size="small"
         />
         <TextField
-          label="season"
+          label="Season"
           type="text"
           id="season"
           name="season"
@@ -46,7 +60,7 @@ export default function SeriesForm(props) {
           size="small"
         />
         <TextField
-          label="episode"
+          label="Episode"
           type="text"
           id="episode"
           name="episode"
@@ -57,7 +71,7 @@ export default function SeriesForm(props) {
           size="small"
         />
         <TextField
-          label="extraInfo"
+          label="Extra info"
           type="text"
           id="extraInfo"
           name="extraInfo"
@@ -67,7 +81,10 @@ export default function SeriesForm(props) {
           }}
           size="small"
         />
-        <Button variant="contained" type="submit">Submit</Button>
+        <br />
+        <Button variant="contained" type="submit">
+          Submit
+        </Button>
       </form>
     </React.Fragment>
   );
