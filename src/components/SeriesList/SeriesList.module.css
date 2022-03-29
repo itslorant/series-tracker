@@ -1,0 +1,10 @@
+.Table{
+    width: 100%;
+    margin: auto;
+}
+
+@media (min-width: 800px){
+    .Table{
+        width: 800px;
+    }
+}
