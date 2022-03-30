@@ -26,11 +26,13 @@ export default function SeriesForm(props) {
 
   const submitHandler = (event) => {
     event.preventDefault();
+    const userId = localStorage.getItem('userId')
     props.onSubmit({
       title: title,
       season: season,
       episode: episode,
       extraInfo: extraInfo,
+      userId : userId,
     });
   };
 
