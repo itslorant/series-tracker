@@ -32,8 +32,11 @@ export default function Series() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const queryParams = `?auth=${token}&orderBy="userId"&equalTo="${userId}"`
     axios({
-      url: process.env.REACT_APP_BASE_URL + "/series.json",
+      url: process.env.REACT_APP_BASE_URL + "/series.json" + queryParams,
       method: "GET",
     })
       .then((response) => {
