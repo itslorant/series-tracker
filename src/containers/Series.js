@@ -8,6 +8,7 @@ import Modal from "../components/UI/Modal/Modal";
 import Button from "@mui/material/Button";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
+import Spinner from "../components/UI/Spinner/Spinner";
 
 import style from "./Series.module.css";
 
@@ -32,9 +33,15 @@ export default function Series() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    const queryParams = `?auth=${token}&orderBy="userId"&equalTo="${userId}"`
+    setIsLoading(true);
+    setTimeout(() => {getAllSeries(); setIsLoading(false)}, 1000);
+  }, []);
+
+  const getAllSeries = () => {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    const queryParams = `?auth=${token}&orderBy="userId"&equalTo="${userId}"`;
+
     axios({
       url: process.env.REACT_APP_BASE_URL + "/series.json" + queryParams,
       method: "GET",
@@ -53,9 +60,10 @@ export default function Series() {
         dispatch({ type: "SET", series: series });
       })
       .catch((error) => setError(error.message));
-  }, [isLoading]);
+  };
 
   const onAddSeriesHandler = (series) => {
+    setIsLoading(true);
     axios({
       url: process.env.REACT_APP_BASE_URL + "/series.json",
       method: "POST",
@@ -66,13 +74,15 @@ export default function Series() {
           type: "ADD",
           serie: { id: response.data.name, ...response.data },
         });
-        setIsLoading((prevLoading) => !prevLoading);
+        setIsLoading(false);
+        // setIsLoading((prevLoading) => !prevLoading);
       })
-      .catch((error) => setError(error.message));
+      .catch((error) => {setError(error.message); setIsLoading(false);});
     onCloseModal();
   };
 
   const onDeleteSeriesHandler = (event, seriesId) => {
+    setIsLoading(true);
     axios({
       url: process.env.REACT_APP_BASE_URL + `/series/${seriesId}.json`,
       method: "DELETE",
@@ -82,9 +92,10 @@ export default function Series() {
           type: "DELETE",
           serie: { id: seriesId },
         });
-        setIsLoading((prevLoading) => !prevLoading);
+        setIsLoading(false);
+        // setIsLoading((prevLoading) => !prevLoading);
       })
-      .catch((error) => setError(error.message));
+      .catch((error) => {setError(error.message); setIsLoading(false)});
   };
 
   const onModifySeriesHandler = (event, seriesId) => {
@@ -93,15 +104,17 @@ export default function Series() {
   };
 
   const modifySeries = (series) => {
+    setIsLoading(true);
     axios({
       url: process.env.REACT_APP_BASE_URL + `/series/${seriesId}.json`,
       method: "PATCH",
       data: series,
     })
       .then((response) => {
-        setIsLoading((prevLoading) => !prevLoading);
+        // setIsLoading((prevLoading) => !prevLoading);
+        setIsLoading(false);
       })
-      .catch((error) => setError(error.message));
+      .catch((error) => {setError(error.message); setIsLoading(false)});
     setSeriesId(null);
     onCloseModal();
   };
@@ -112,7 +125,7 @@ export default function Series() {
 
   const onCloseModal = () => {
     setShowModal(false);
-    setSeriesId(null)
+    setSeriesId(null);
   };
 
   let modalTitle = "Add Series";
@@ -139,18 +152,23 @@ export default function Series() {
     </Fab>
   );
 
+  let seriesList = (<SeriesList
+    series={userSeries}
+    onModifySeries={(event, seriesId) =>
+      onModifySeriesHandler(event, seriesId)
+    }
+    onDeleteSeries={(event, seriesId) =>
+      onDeleteSeriesHandler(event, seriesId)
+    }
+  />)
+console.log('render')
   return (
     <React.Fragment>
       <h1>Series</h1>
       {error}
+      {isLoading && <Spinner />}
       {showModal && modal}
-      <SeriesList 
-        series={userSeries}
-        onModifySeries={(event, seriesId) =>
-          onModifySeriesHandler(event, seriesId)
-        }
-        onDeleteSeries={(event, seriesId) => onDeleteSeriesHandler(event, seriesId)}
-      />
+      {!isLoading && seriesList}  
       <div className={style.AddButton}>{!showModal && addButton}</div>
     </React.Fragment>
   );
