@@ -1,11 +1,11 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
 
-import axios from "axios";
+import useHttp from "../hooks/http";
 
 import SeriesForm from "../components/SeriesForm/SeriesForm";
 import SeriesList from "../components/SeriesList/SeriesList";
+import SearchField from "../components/Search/Search";
 import Modal from "../components/UI/Modal/Modal";
-import Button from "@mui/material/Button";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Spinner from "../components/UI/Spinner/Spinner";
@@ -18,6 +18,12 @@ const seriesReducer = (currentSeries, action) => {
       return action.series;
     case "ADD":
       return [...currentSeries, action.serie];
+    case "MODIFY":
+      const newState = currentSeries.map((cs) => {
+        if (cs.id === action.serie.id) return action.serie;
+        return { ...cs };
+      });
+      return newState;
     case "DELETE":
       return currentSeries.filter((se) => se.id !== action.id);
     default:
@@ -27,75 +33,49 @@ const seriesReducer = (currentSeries, action) => {
 
 export default function Series() {
   const [userSeries, dispatch] = useReducer(seriesReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
   const [seriesId, setSeriesId] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const { sendRequest, clear, isLoading, data, error, reqBody, reqMethod } =
+    useHttp();
 
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {getAllSeries(); setIsLoading(false)}, 1000);
-  }, []);
-
-  const getAllSeries = () => {
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
-    const queryParams = `?auth=${token}&orderBy="userId"&equalTo="${userId}"`;
-
-    axios({
-      url: process.env.REACT_APP_BASE_URL + "/series.json" + queryParams,
-      method: "GET",
-    })
-      .then((response) => {
-        const series = [];
-        for (const key in response.data) {
-          series.push({
-            id: key,
-            title: response.data[key].title,
-            season: response.data[key].season,
-            episode: response.data[key].episode,
-            extraInfo: response.data[key].extraInfo,
+    if (!isLoading && data && !error) {
+      switch (reqMethod) {
+        case "POST":
+          dispatch({
+            type: "ADD",
+            serie: { id: data.name, ...reqBody },
           });
-        }
-        dispatch({ type: "SET", series: series });
-      })
-      .catch((error) => setError(error.message));
-  };
+          clear();
+          break;
+        case "PATCH":
+          dispatch({
+            type: "MODIFY",
+            serie: { id: seriesId, ...data },
+          });
+          clear();
+          onCloseModal();
+          break;
+        default:
+          throw new Error("This method is not available!");
+      }
+    }
+    if (!isLoading && !data && !error && reqMethod === "DELETE") {
+      dispatch({
+        type: "DELETE",
+        id: reqBody.seriesId,
+      });
+      clear();
+    }
+  }, [data, isLoading, error, reqMethod, reqBody, seriesId, clear]);
 
   const onAddSeriesHandler = (series) => {
-    setIsLoading(true);
-    axios({
-      url: process.env.REACT_APP_BASE_URL + "/series.json",
-      method: "POST",
-      data: series,
-    })
-      .then((response) => {
-        dispatch({
-          type: "ADD",
-          serie: { id: response.data.name, ...response.data },
-        });
-        setIsLoading(false);
-        // setIsLoading((prevLoading) => !prevLoading);
-      })
-      .catch((error) => {setError(error.message); setIsLoading(false);});
+    sendRequest("/series.json", "", "POST", series);
     onCloseModal();
   };
 
   const onDeleteSeriesHandler = (event, seriesId) => {
-    setIsLoading(true);
-    axios({
-      url: process.env.REACT_APP_BASE_URL + `/series/${seriesId}.json`,
-      method: "DELETE",
-    })
-      .then((response) => {
-        dispatch({
-          type: "DELETE",
-          serie: { id: seriesId },
-        });
-        setIsLoading(false);
-        // setIsLoading((prevLoading) => !prevLoading);
-      })
-      .catch((error) => {setError(error.message); setIsLoading(false)});
+    sendRequest(`/series/${seriesId}.json`, "", "DELETE", { seriesId });
   };
 
   const onModifySeriesHandler = (event, seriesId) => {
@@ -104,19 +84,7 @@ export default function Series() {
   };
 
   const modifySeries = (series) => {
-    setIsLoading(true);
-    axios({
-      url: process.env.REACT_APP_BASE_URL + `/series/${seriesId}.json`,
-      method: "PATCH",
-      data: series,
-    })
-      .then((response) => {
-        // setIsLoading((prevLoading) => !prevLoading);
-        setIsLoading(false);
-      })
-      .catch((error) => {setError(error.message); setIsLoading(false)});
-    setSeriesId(null);
-    onCloseModal();
+    sendRequest(`/series/${seriesId}.json`, "", "PATCH", series);
   };
 
   const onShowModal = () => {
@@ -152,23 +120,34 @@ export default function Series() {
     </Fab>
   );
 
-  let seriesList = (<SeriesList
-    series={userSeries}
-    onModifySeries={(event, seriesId) =>
-      onModifySeriesHandler(event, seriesId)
-    }
-    onDeleteSeries={(event, seriesId) =>
-      onDeleteSeriesHandler(event, seriesId)
-    }
-  />)
-console.log('render')
+  let seriesList = [];
+  if (userSeries) {
+    seriesList = (
+      <SeriesList
+        series={userSeries}
+        onModifySeries={(event, seriesId) =>
+          onModifySeriesHandler(event, seriesId)
+        }
+        onDeleteSeries={(event, seriesId) =>
+          onDeleteSeriesHandler(event, seriesId)
+        }
+      />
+    );
+  }
+
+  const getSeries = useCallback((searchedSeries) => {
+    dispatch({ type: "SET", series: searchedSeries });
+  }, []);
+
+  let search = <SearchField loadSeries={getSeries} />;
   return (
     <React.Fragment>
       <h1>Series</h1>
       {error}
       {isLoading && <Spinner />}
       {showModal && modal}
-      {!isLoading && seriesList}  
+      {search}
+      {!isLoading && seriesList}
       <div className={style.AddButton}>{!showModal && addButton}</div>
     </React.Fragment>
   );
