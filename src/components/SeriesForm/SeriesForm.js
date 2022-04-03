@@ -26,13 +26,13 @@ export default function SeriesForm(props) {
 
   const submitHandler = (event) => {
     event.preventDefault();
-    const userId = localStorage.getItem('userId')
+    const userId = localStorage.getItem("userId");
     props.onSubmit({
       title: title,
       season: season,
       episode: episode,
       extraInfo: extraInfo,
-      userId : userId,
+      userId: userId,
     });
   };
 
@@ -40,6 +40,7 @@ export default function SeriesForm(props) {
     <React.Fragment>
       <form onSubmit={submitHandler}>
         <TextField
+          required
           label="Title"
           type="text"
           id="title"
@@ -51,8 +52,9 @@ export default function SeriesForm(props) {
           size="small"
         />
         <TextField
+          required
           label="Season"
-          type="text"
+          type="number"
           id="season"
           name="season"
           value={season}
@@ -62,8 +64,9 @@ export default function SeriesForm(props) {
           size="small"
         />
         <TextField
+          required
           label="Episode"
-          type="text"
+          type="number"
           id="episode"
           name="episode"
           value={episode}
