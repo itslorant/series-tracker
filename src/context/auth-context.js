@@ -6,11 +6,15 @@ export const AuthContext = React.createContext({
   login: () => {},
   logout: () => {},
   checkAuthState: () => {},
+  clear:()=>{},
 });
 
 const AuthContextProvider = (props) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [error, setError] = useState(null);
+  
+  const clear = () => setError(null);
+  
   const loginHandler = (email, password) => {
     const authData = {
       email: email,
@@ -29,12 +33,13 @@ const AuthContextProvider = (props) => {
         localStorage.setItem("token", response.data.idToken);
         localStorage.setItem("expirationDate", expirationDate);
         localStorage.setItem("userId", response.data.localId);
+        setIsAuthenticated(true);
       })
       .catch((error) => {
-        console.log(error);
+        setError(error.response.data.error.message);
+        setIsAuthenticated(false);
       });
 
-    setIsAuthenticated(true);
   };
 
   const logout = () => {
@@ -60,9 +65,11 @@ const AuthContextProvider = (props) => {
     <AuthContext.Provider
       value={{
         isAuth: isAuthenticated,
+        error:error,
         login: loginHandler,
         logout: logout,
         checkAuth: checkAuthState,
+        clear: clear,
       }}
       {...props}
     >
