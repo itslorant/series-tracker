@@ -13,11 +13,12 @@ const SearchField = (props) => {
     const timer = setTimeout(() => {
       const userId = localStorage.getItem("userId");
       const url = '/series.json';
+      const defaultQueryParam = `orderBy="userId"&equalTo="${userId}"`;
       if (userInput === inputRef.current.value) {
         const queryParams =
           userInput.length === 0
-            ? `orderBy="userId"&equalTo="${userId}"`
-            : `orderBy="title"&equalTo="${userInput}"`;
+            ? defaultQueryParam
+            : `${defaultQueryParam}"&orderBy="title"&equalTo="${userInput}"`;
         sendRequest(url, queryParams, "GET");
       }
     }, 500);
