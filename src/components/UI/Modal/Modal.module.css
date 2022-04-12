@@ -9,7 +9,7 @@
 }
 
 .Modal h2 {
-  margin: 0;
+  margin: 0 !important;
   padding: 1rem;
   background: #2075ff;
   color: white;
