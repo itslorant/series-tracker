@@ -24,6 +24,10 @@ const seriesReducer = (currentSeries, action) => {
         return { ...cs };
       });
       return newState;
+    case "FILTER":
+      return currentSeries.filter((se) =>
+        se.title.toLowerCase().includes(action.title.toLowerCase().trim())
+      );
     case "DELETE":
       return currentSeries.filter((se) => se.id !== action.id);
     default:
@@ -96,6 +100,14 @@ export default function Series() {
     setSeriesId(null);
   };
 
+  const getSeries = useCallback((searchedSeries) => {
+    dispatch({ type: "SET", series: searchedSeries });
+  }, []);
+
+  const filteredTitle = useCallback((title) => {
+    dispatch({ type: "FILTER", title: title });
+  }, []);
+
   let modalTitle = "Add Series";
   let seriesForm = <SeriesForm onSubmit={onAddSeriesHandler} />;
   if (seriesId) {
@@ -135,11 +147,9 @@ export default function Series() {
     );
   }
 
-  const getSeries = useCallback((searchedSeries) => {
-    dispatch({ type: "SET", series: searchedSeries });
-  }, []);
-
-  let search = <SearchField loadSeries={getSeries} />;
+  let search = (
+    <SearchField loadSeries={getSeries} filterableTitle={filteredTitle} />
+  );
   return (
     <React.Fragment>
       <h1>Series</h1>
