@@ -6,27 +6,25 @@ import TextField from "@mui/material/TextField";
 const SearchField = (props) => {
   const [userInput, setUserInput] = useState("");
   const inputRef = useRef();
-  const { sendRequest, clear, isLoading, data, error } = useHttp();
-  const { loadSeries } = props;
+  const { sendRequest, isLoading, data } = useHttp();
+  const { loadSeries, filterableTitle } = props;
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const userId = localStorage.getItem("userId");
-      const url = "/series.json";
-      const defaultQueryParam = `orderBy="userId"&equalTo="${userId}"`;
       if (userInput === inputRef.current.value) {
-        const queryParams =
-          userInput.length === 0
-            ? defaultQueryParam
-            : `${defaultQueryParam}&orderBy="title"&equalTo="${userInput}"`;
-        sendRequest(url, queryParams, "GET");
+        if (userInput === "") {
+          const userId = localStorage.getItem("userId");
+          sendRequest("/series.json", `orderBy="userId"&equalTo="${userId}"`, "GET");
+        } else {
+          filterableTitle(userInput);
+        }
       }
     }, 500);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [sendRequest, inputRef, userInput]);
+  }, [sendRequest, inputRef, userInput, filterableTitle]);
 
   useEffect(() => {
     const series = [];
