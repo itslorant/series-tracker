@@ -12,7 +12,7 @@ const SearchField = (props) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       const userId = localStorage.getItem("userId");
-      const url = '/series.json';
+      const url = "/series.json";
       const defaultQueryParam = `orderBy="userId"&equalTo="${userId}"`;
       if (userInput === inputRef.current.value) {
         const queryParams =
@@ -40,20 +40,23 @@ const SearchField = (props) => {
       });
     }
     loadSeries(series);
-  }, [data, loadSeries, ]);
+  }, [data, loadSeries]);
 
   return (
-    <TextField
-      label="Search"
-      type="text"
-      id="search"
-      name="search"
-      inputRef={inputRef}
-      size="small"
-      sx={{ background: "white", borderRadius: "4px", margin: "0 0 10px 0" }}
-      value={userInput}
-      onChange={(e) => setUserInput(e.target.value)}
-    />
+    <React.Fragment>
+      {isLoading && <p>Searching...</p>}
+      <TextField
+        label="Search"
+        type="text"
+        id="search"
+        name="search"
+        inputRef={inputRef}
+        size="small"
+        sx={{ background: "white", borderRadius: "4px", margin: "0 0 10px 0" }}
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+      />
+    </React.Fragment>
   );
 };
 
