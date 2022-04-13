@@ -18,7 +18,7 @@ const SearchField = (props) => {
         const queryParams =
           userInput.length === 0
             ? defaultQueryParam
-            : `${defaultQueryParam}"&orderBy="title"&equalTo="${userInput}"`;
+            : `${defaultQueryParam}&orderBy="title"&equalTo="${userInput}"`;
         sendRequest(url, queryParams, "GET");
       }
     }, 500);
