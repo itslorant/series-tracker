@@ -1,15 +1,19 @@
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 
 import Card from "../components/UI/Card/Card";
 import Modal from "../components/UI/Modal/Modal";
 import { Button, TextField } from "@mui/material";
 import { Avatar } from "@mui/material";
+import ChangePassword from "../components/User/ChangePassword/ChangePassword";
 
 export default function User() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [responseMessage, setResponseMessage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  
   useEffect(() => {
     const url =
       "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" +
@@ -32,7 +36,6 @@ export default function User() {
       process.env.REACT_APP_WEB_API_KEY;
 
     const userToken = localStorage.getItem("token");
-    console.log("name", name);
     const payload = {
       idToken: userToken,
       displayName: name,
@@ -45,27 +48,39 @@ export default function User() {
       .catch((error) => console.log(error));
   };
 
-  const onCloseModal = () => {
+  const onShowPasswordChange = () => {
+    setShowPasswordChange(true);
+  };
+
+  const onHidePasswordChange = () => {
+    setShowPasswordChange(false);
+  };
+
+  const setNewPassword = (password) => {
+    if (password) {
+       const url =
+      "https://identitytoolkit.googleapis.com/v1/accounts:update?key=" +
+      process.env.REACT_APP_WEB_API_KEY;
+    const userToken = localStorage.getItem("token");
+    const payload = {
+      idToken: userToken,
+      password: password,
+      returnSecureToken:true
+    };
+    axios
+      .post(url, payload)
+      .then((response) => {
+        console.log(response)
+        setResponseMessage('Password changed succesfully!')
+        setShowModal(true);
+      })
+      .catch((error) => console.log(error));
+    }
+  };
+
+  const onCloseModal = () =>{
     setShowModal(false);
-  };
-
-  const onShowModal = () => {
-    setShowModal(true);
-  };
-
-  const changePassword = () => {};
-
-  console.log("render");
-  const modal = (
-    <Modal title="Password change" onClose={onCloseModal}>
-      <TextField placeholder="Current password" />
-      <TextField placeholder="New password" />
-      <TextField placeholder="New password" />
-      <Button onClick={changePassword} variant="contained">
-        Change password
-      </Button>
-    </Modal>
-  );
+  }
 
   const table = (
     <table>
@@ -96,16 +111,29 @@ export default function User() {
     </table>
   );
 
+  const changePassword = (
+    <ChangePassword
+      onClose={onHidePasswordChange}
+      newPassword={(password) => setNewPassword(password)}
+    />
+  );
+
+
+  const message = (<Modal title="Message" onClose={onCloseModal}>{responseMessage}</Modal>)
+
+  console.log("render");
+
   return (
     <div style={{ width: "300px", margin: "auto", paddingTop: "60px" }}>
+      {showPasswordChange && changePassword}
+      {showModal && message}
       <Card>
         <Avatar style={{ margin: "auto 0 auto auto" }}>{name.charAt(0)}</Avatar>
-        {showModal && modal}
         {table}
         <Button variant="contained" onClick={updateUserName}>
           Update profile
         </Button>
-        <Button variant="contained" onClick={onShowModal}>
+        <Button variant="contained" onClick={onShowPasswordChange}>
           Change password
         </Button>
       </Card>
