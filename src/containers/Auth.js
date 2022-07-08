@@ -6,16 +6,18 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Modal from "../components/UI/Modal/Modal";
 import style from "./Auth.module.css";
+import { Checkbox } from "@mui/material";
 
 const Auth = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
 
   const authContext = useContext(AuthContext);
   const loginHandler = (e) => {
     e.preventDefault();
-    authContext.login(email, password);
+    authContext.login(email, password, keepLoggedIn);
   };
 
   useEffect(() => {
@@ -26,6 +28,7 @@ const Auth = (props) => {
     setShowModal(false);
     authContext.clear();
   };
+
   const modal = (
     <Modal title="Error in login!" onClose={onCloseModal}>
       <p> Your username or password is invalid!</p>
@@ -38,6 +41,7 @@ const Auth = (props) => {
       </Button>
     </Modal>
   );
+
   return (
     <div className={style.Auth}>
       {showModal && modal}
@@ -69,11 +73,14 @@ const Auth = (props) => {
             size="small"
           />
           <div className={style.Placeholder}></div>
-          <Button
-            className={style.Button}
-            variant="contained"
-            type="submit"
-          >
+          <Checkbox
+            label="Keep logged in"
+            onChange={(e) => {
+              setKeepLoggedIn(e.target.checked);
+            }}
+          /> Keep me logged in
+          <div className={style.Placeholder}></div>
+          <Button className={style.Button} variant="contained" type="submit">
             Submit
           </Button>
         </form>
