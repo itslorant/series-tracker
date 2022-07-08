@@ -30,7 +30,7 @@ export default function SeriesList(props) {
   return (
     <div className={style.Table}>
       <Paper sx={{ overflow: "hidden" }}>
-        <TableContainer sx={{ maxHeight: 800 }}>
+        <TableContainer sx={{ maxHeight: 850 }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
