@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useReducer, useState } from "react";
 
 import useHttp from "../hooks/http";
 
+import ApplicationBar from "../components/UI/Appbar/Appbar";
 import SeriesForm from "../components/SeriesForm/SeriesForm";
 import SeriesList from "../components/SeriesList/SeriesList";
 import SearchField from "../components/Search/Search";
@@ -147,16 +148,16 @@ export default function Series() {
     );
   }
 
-  let search = (
-    <SearchField loadSeries={getSeries} filterableTitle={filteredTitle} />
-  );
+  // let search = (
+  //   <SearchField loadSeries={getSeries} filterableTitle={filteredTitle} />
+  // );
   return (
     <React.Fragment>
-      <h1>Series</h1>
+      <ApplicationBar  loadSeries={getSeries} filterableTitle={filteredTitle} />
       {error}
       {isLoading && <Spinner />}
       {showModal && modal}
-      {search}
+      {/* {search} */}
       {!isLoading && seriesList}
       <div className={style.AddButton}>{!showModal && addButton}</div>
     </React.Fragment>
