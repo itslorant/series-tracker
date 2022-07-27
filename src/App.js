@@ -13,6 +13,15 @@ function App() {
 
   useEffect(() => {
     authContext.checkAuth();
+    
+    const intervalDuration =
+      new Date(localStorage.getItem("expirationDate")).getTime() -
+      new Date().getTime();
+    const timer = setInterval(() => {
+      authContext.checkAuth();
+    }, intervalDuration);
+    return () => clearInterval(timer);
+    
   }, [authContext]);
 
   let content = <Auth />;
